@@ -1,0 +1,244 @@
+<table class="texreg" style="margin: 10px auto;border-collapse: collapse;border-spacing: 0px;caption-side: bottom;color: #000000;border-top: 2px solid #000000;">
+<caption>Statistical models</caption>
+<thead>
+<tr>
+<th style="padding-left: 5px;padding-right: 5px;">&nbsp;</th>
+<th style="padding-left: 5px;padding-right: 5px;">Model 1</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-top: 1px solid #000000;">
+<td style="padding-left: 5px;padding-right: 5px;">Number of Edges</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-4.03</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.11)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Conservative -> Reactionary</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.67</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.17)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Moderate -> Reactionary</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-1.64</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.21)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Liberal -> Reactionary</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-2.47</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.26)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Radical -> Reactionary</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-2.61</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.42)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Reactionary -> Conservative</td>
+<td style="padding-left: 5px;padding-right: 5px;">-0.13</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.14)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Conservative -> Conservative</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>0.89</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.13)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Moderate -> Conservative</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.47</b><sup>&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.21)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Liberal -> Conservative</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.81</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.21)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Radical -> Conservative</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-1.78</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.51)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Reactionary -> Moderate</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-1.16</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.17)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Conservative -> Moderate</td>
+<td style="padding-left: 5px;padding-right: 5px;">-0.39</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.20)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Moderate -> Moderate</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-1.14</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.22)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Liberal -> Moderate</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.84</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.17)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Radical -> Moderate</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-2.36</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.50)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Reactionary -> Liberal</td>
+<td style="padding-left: 5px;padding-right: 5px;">-0.15</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.11)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Conservative -> Liberal</td>
+<td style="padding-left: 5px;padding-right: 5px;">-0.08</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.16)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Moderate -> Liberal</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.92</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.18)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Liberal -> Liberal</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>0.31</b><sup>&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.09)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Radical -> Liberal</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-1.21</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.26)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Reactionary -> Radical</td>
+<td style="padding-left: 5px;padding-right: 5px;">-0.23</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.15)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Conservative -> Radical</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.72</b><sup>&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.31)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Moderate -> Radical</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.68</b><sup>&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.23)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Liberal -> Radical</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>-0.91</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.23)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Radical -> Radical</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>0.35</b><sup>&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.17)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Ratio of Biased to Unbiased Statements</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>1.16</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.14)</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">Presence of Reciprocal Collaboration</td>
+<td style="padding-left: 5px;padding-right: 5px;"><b>1.87</b><sup>&#42;&#42;&#42;</sup></td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">&nbsp;</td>
+<td style="padding-left: 5px;padding-right: 5px;">(0.13)</td>
+</tr>
+<tr style="border-top: 1px solid #000000;">
+<td style="padding-left: 5px;padding-right: 5px;">AIC</td>
+<td style="padding-left: 5px;padding-right: 5px;">11104.11</td>
+</tr>
+<tr>
+<td style="padding-left: 5px;padding-right: 5px;">BIC</td>
+<td style="padding-left: 5px;padding-right: 5px;">11346.63</td>
+</tr>
+<tr style="border-bottom: 2px solid #000000;">
+<td style="padding-left: 5px;padding-right: 5px;">Log Likelihood</td>
+<td style="padding-left: 5px;padding-right: 5px;">-5525.06</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="font-size: 0.8em;" colspan="2"><sup>&#42;&#42;&#42;</sup>p &lt; 0.001; <sup>&#42;&#42;</sup>p &lt; 0.01; <sup>&#42;</sup>p &lt; 0.05</td>
+</tr>
+</tfoot>
+</table>
