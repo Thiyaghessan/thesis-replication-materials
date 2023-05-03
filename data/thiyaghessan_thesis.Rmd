@@ -1,0 +1,52 @@
+---
+title: "Thesis"
+author: "Thiyaghessan"
+date: "2023-04-30"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+---
+
+```{=latex}
+\documentclass{ucetd}
+
+\usepackage[T1]{fontenc}
+\usepackage{subcaption,graphicx}
+\usepackage{natbib}
+\usepackage{mathtools}  % loads amsmath
+\usepackage{amssymb}    % loads amsfonts
+\usepackage{amsthm}
+
+%% Use these commands to set biographic information for the title page:
+\newcommand{\thesistitle}{Thesis Title}
+\newcommand{\thesisauthor}{Thesis Author}
+\department{Thesis Department}
+\division{Thesis Division}
+\degree{Type of Degree}
+\date{Graduation Date}
+
+\title{\thesistitle}
+\author{\thesisauthor}
+
+%% Use these commands to set a dedication and epigraph text
+\dedication{Dedication Text}
+\epigraph{Epigraph Text}
+
+\usepackage{doi}
+\usepackage{xurl}
+\hypersetup{bookmarksnumbered,
+            colorlinks,
+            linktoc=all,
+            pdftitle={\thesistitle},
+            pdfauthor={\thesisauthor},
+            pdfsubject={},                                % Add subject/description
+            % pdfkeywords={keyword1, keyword2, keyword3}, % Uncomment and revise keywords
+            pdfborder={0 0 0}}
+% See https://github.com/k4rtik/uchicago-dissertation/issues/1
+\makeatletter
+\let\ORG@hyper@linkstart\hyper@linkstart
+\protected\def\hyper@linkstart#1#2{%
+  \lowercase{\ORG@hyper@linkstart{#1}{#2}}}
+\makeatother
+```

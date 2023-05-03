@@ -1,0 +1,26 @@
+,crosspart,count,weight,homophilic,cross
+1,conservative - conservative,65,1403,1,0
+2,conservative - liberal,49,901,0,2
+3,conservative - moderate,29,327,0,1
+4,conservative - radical,11,23,0,3
+5,reactionary - conservative,42,223,0,0
+6,conservative - liberal,26,235,0,2
+7,liberal - liberal,180,2322,1,0
+8,moderate - liberal,41,214,0,1
+9,liberal - radical,21,107,0,0
+10,reactionary - liberal,16,28,0,3
+11,conservative - moderate,27,378,0,1
+12,moderate - liberal,38,776,0,1
+13,moderate - moderate,23,366,1,0
+14,moderate - radical,20,233,0,2
+15,reactionary - moderate,26,78,0,2
+16,conservative - radical,4,33,0,3
+17,liberal - radical,16,44,0,0
+18,moderate - radical,4,83,0,2
+19,radical - radical,35,409,1,0
+20,reactionary - radical,6,16,0,4
+21,reactionary - conservative,67,339,0,0
+22,reactionary - liberal,137,1012,0,3
+23,reactionary - moderate,41,133,0,2
+24,reactionary - radical,55,243,0,4
+25,reactionary - reactionary,261,1993,1,0
