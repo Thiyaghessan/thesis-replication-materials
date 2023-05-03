@@ -1,0 +1,674 @@
+---
+title: "Thesis"
+author: "Thiyaghessan"
+date: "2023-04-30"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document: default
+---
+
+## Analysis Replication Guide
+
+This markdown file replicates all plots produced in the accompanying thesis.
+
+## Load packages and configure environment
+
+```{r, echo=FALSE, setup}
+rm(list = ls()) # Clear Environment
+# Set working directory to where the data files are located
+knitr::opts_knit$set(root.dir = "C:/Users/thiya/OneDrive/Uchicago/thesis/data")
+
+library(dplyr)
+library(tidyverse)
+library(igraph)
+library(kableExtra)
+library(intergraph)
+library(ergm)
+library(texreg)
+library(stringr)
+
+windowsFonts("Arial" = windowsFont("Arial")) # Set font for plots
+```
+
+## Global Variables
+
+```{r}
+# These podcasts are far away from the center of the network and are excluded from visualization
+Extra_Exclude <- c("POLITICO Energy", "Washington Today")
+
+# Set color pallette for network visualizations
+Viz_Colors <- c("darkred", "tomato", "gray80", "skyblue", "darkblue", "gray80")
+
+# Configurations for Degree Distribution Graphs
+Degree_Ideologies <- c("Reactionary", "Conservative", "Moderate", "Liberal", "Radical", "NULL")
+Degree_Colors <- c("tomato", "skyblue", "gray50", "black", "darkblue", "darkred")
+
+# Configurations for Betweenness Centrality Distribution Plot
+Btwn_Ideologies <- c("Conservative", "Liberal", "Moderate", "Radical", "Reactionary", "NULL")
+Btwn_Colors <- c("tomato", "skyblue", "gray50", "darkblue", "darkred", "black")
+
+# Configurations for Power Law Ideologies
+Plaw_Ideologies <- c("Reactionary", "Conservative", "Moderate", "Liberal", "Radical")
+```
+
+
+## Required Functions
+
+```{r}
+# Function to create a dataframe that aggregates degree distribution by ideology
+make_deg_df <- function(g, mode, ideologies){
+ for (i in 1:6){
+   deg_ideology <- igraph::degree(g,
+                                  v = V(g)$ideology == i,
+                                  mode = mode)
+   deg_df <- as.data.frame(table(deg_ideology)) %>%
+     mutate(ideology = ideologies[i])
+   if (i == 1){
+     master_deg_df <- deg_df
+     } else {
+       master_deg_df <- rbind(master_deg_df, deg_df)    
+     }
+ }
+  return(master_deg_df)
+}
+
+# Function to create a dataframe that contains power law fits for degree distributions by ideology
+make_deg_plaw_df <- function(ideologies, deg_df){
+  for (id in ideologies){
+  df = as.data.frame(power.law.fit(deg_df$Freq[deg_df$ideology == id]))
+  if (id == "Reactionary"){
+    plaw_df = df
+  } else {
+    plaw_df = rbind(plaw_df, df)
+  }
+  }
+  return(plaw_df)
+}
+
+```
+
+
+## Data Preprocessing
+
+```{r}
+# Import csv containing information on podcasts
+pod_df <- read.csv("podcast_hosts.csv") # Data on podcasts
+pod_bias_df <- read.csv("podcast_bias.csv") # Data on the level of Bias 
+hosts_df <- read.csv("podcast_hostattribs.csv") # Data on the podcast hosts' occupations/source of fame
+
+# Merge dataframes
+nodes_df <- left_join(pod_df, pod_bias_df, by = "podcasts")
+
+# Summarise the number of unique distributors present in the dataset
+distrib_df <- nodes_df %>%
+  group_by(parent) %>% 
+  summarise(count = n())
+# Isolate distributors who own/represent more than one podcast in the dataset
+distributors <- distrib_df$parent[distrib_df$count > 1]
+
+# Add this information to nodes_df and recode other variables accordingly
+nodes_df <- nodes_df %>% 
+  mutate(distributor = ifelse(parent %in% distributors, parent, 
+                            ifelse(parent != "Independent", "Single Company", "Independent")),
+         distributor_code = ifelse(distributor == "Independent", 3,
+                                   ifelse(distributor == "Single Company", 2, 1)),
+         bias_ratio = numbiased / (numbiased + numunbiased),
+         bias_ratio = ifelse(is.nan(bias_ratio), mean(bias_ratio, na.rm = TRUE), bias_ratio),
+         bias_ratio = ifelse(bias_ratio > 0, bias_ratio, mean(bias_ratio)),
+         id_code = ifelse(main_ideology == "reactionary", 1, 
+                          ifelse(main_ideology == "conservative", 2, 
+                                 ifelse(main_ideology == "moderate", 3, 
+                                        ifelse(main_ideology == "liberal", 4, 
+                                               ifelse(main_ideology == "radical", 5, 6))))))
+
+
+# Import data frame with podcast collaborations
+collab_df <- read.csv("podcast_collabs.csv") %>% 
+  rename("from" = "From",
+         "to" = "To") %>% 
+  group_by(from, to) %>% 
+  summarise(weight = n()) # weight edges by number of repeat appearances
+
+# Import data summarizing total number of cross-partisan/homophilic collaborations
+crosspart_df <- read.csv("crosspart2.csv") %>% 
+                group_by(crosspart) %>% 
+                summarise(count = sum(count),
+                          weight = sum(weight),
+                          homophilic = mean(homophilic),
+                          cross = mean(cross))
+
+# create social network graph
+g_full <- graph_from_data_frame(collab_df,
+                           directed = TRUE,
+                           vertices = nodes_df$podcasts) # Directed edges
+
+# Set node attributes
+g_full <- g_full %>% 
+  set_vertex_attr("ideology",
+                  index = V(g_full),
+                  value = nodes_df$id_code) %>% 
+  set_vertex_attr("distributor",
+                  index = V(g_full),
+                  value = nodes_df$distributor_code) %>% 
+  set_vertex_attr("bias_count",
+                  index = V(g_full),
+                  value = nodes_df$numbiased) %>%
+  set_vertex_attr("bias_ratio",
+                  index = V(g_full),
+                  value = nodes_df$bias_ratio) 
+```
+
+
+## Data Preprocessing for Visualization
+
+The first step is to load in the necessary data and functions
+
+```{r, echo=FALSE}
+# We want to exclude nodes in the visualization that have no edges.
+# If we don't do that, R will zoom  out and make the plot very small
+main_exclude <- unique(c(collab_df$from, collab_df$to, Extra_Exclude))
+
+# Subset the data to only include nodes and edges for visualization
+nodes_viz_df <- nodes_df %>% 
+  filter(podcasts %in% main_exclude[! main_exclude %in% Extra_Exclude])
+
+collab_viz_df <- collab_df %>% 
+  filter(from %in% main_exclude[! main_exclude %in% Extra_Exclude],
+         to %in% main_exclude[! main_exclude %in% Extra_Exclude])
+
+# create social network graph for visualization
+g_viz <- graph_from_data_frame(collab_viz_df,
+                               directed = TRUE,
+                               vertices = nodes_viz_df$podcasts) # Directed edges
+
+# Set node attributes
+g_viz <- g_viz %>% 
+  set_vertex_attr("ideology",
+                  index = V(g_viz),
+                  value = nodes_viz_df$id_code)
+
+# Set node color based on ideology
+V(g_viz)$color <- Viz_Colors[V(g_viz)$ideology] 
+
+# Scale node size based on the number of collaborations
+V(g_viz)$size <- log(igraph::degree(g_viz, mode = "all"))
+
+# Set edge attributes
+
+# Set arrow size
+E(g_viz)$arrow.size <- 0.01
+
+# Scale edges on log-scale according to weight
+E(g_viz)$width <- log10(E(g_viz)$weight)
+
+# Assign degree to each node
+deg <- igraph::degree(g_viz, mode = "all")
+
+# Set layout
+l <- layout_with_kk(g_viz)
+```
+
+
+## Network Visualization
+
+```{r}
+par(mar=c(0,0,0,0)+1)
+plot(g_viz,
+     vertex.label = ifelse(deg[V(g_viz)$name] > 100, V(g_viz)$name, NA), # Display labels for podcasts with degree > 100
+     vertex.label.family = "Arial",
+     vertex.label.color = "black",
+     vertex.label.cex = 0.5,
+     edge.color = "gray90",
+     main = "Collaborations Among The 250 Most Popular Political Podcasts",
+     margin = 0)
+
+legend(
+  "bottomright",
+  legend = c("Reactionary", "Conservative", "Moderate", "Liberal", "Radical"),
+  pt.bg  = c("darkred", "tomato", "gray50", "skyblue", "darkblue"),
+  pt.cex = c(2, 2, 2),
+  pch    = 21,
+  cex    = 0.8,
+  bty    = "o",
+  title  = "Ideological Affiliation"
+)
+
+legend(
+  "bottomleft",
+  legend = c("< 10", "10 - 20", "20 - 40", "40 - 60", "> 60"),
+  pt.bg  = "gray50",
+  pt.cex = c(0.4, 0.8, 1.2, 1.6, 1.8),
+  pch    = 21,
+  cex    = 0.8,
+  bty    = "o",
+  title  = "Number of Collaborations"
+)
+```
+
+## Indegree Distribution Plot
+
+```{r}
+# Create DataFrame with distribution
+indeg_df <- make_deg_df(g_full, "in", Degree_Ideologies)
+# Reorder factor levels
+indeg_df$deg_ideology <- factor(indeg_df$deg_ideology,
+                                levels = c("0", "1", "2", "3", "4", "5", "6", "7", 
+                                           "8", "9" , "10", "11", "12", "13", "14",
+                                           "15", "16", "17", "19", "24", "26", "27", "28"))
+# Bar Plot
+indeg_dist_barplot <- ggplot(indeg_df,
+                             aes(x = deg_ideology,
+                                 y = Freq,
+                                 fill = ideology)) +
+                        geom_bar(stat = "identity",
+                                 position = "stack") +
+                        xlab("Number of Guests Hosted") +
+                        ylab("Number of Podcasts") +
+                        labs(title = "In Degree Distribution by Ideology") +
+                        scale_fill_manual(name = "Ideology",
+                                          values = Degree_Colors) +
+                        theme_bw(base_size = 18) +
+                        theme(plot.title = element_text(hjust = 0.5))
+indeg_dist_barplot
+# Compute mean and median
+sprintf("The Mean of this distribution is %.2f", mean(as.integer(indeg_df$deg_ideology)))
+sprintf("The Median of this distribution is %.2f", median(as.integer(indeg_df$deg_ideology)))
+```
+
+## Outdegree Distribution Plot
+
+```{r}
+# Create DataFrame with distribution
+outdeg_df <- make_deg_df(g_full, "out", Degree_Ideologies)
+# Reorder factor levels
+outdeg_df$deg_ideology <- factor(outdeg_df$deg_ideology,
+                                levels = c("0", "1", "2", "3", "4", "5", "6", "7", 
+                                           "8", "9" , "10", "11", "12", "13","14","16", "17", 
+                                           "18", "21", "22", "25", "27", "31", "45", "63", "67"))
+# Bar Plot
+outdeg_dist_barplot <- ggplot(outdeg_df,
+                              aes(x = deg_ideology,
+                                  y = Freq,
+                                 fill = ideology)) +
+                       geom_bar(stat = "identity",
+                                position = "stack") +
+                       xlab("Number of Guests Hosted") +
+                       ylab("Number of Podcasts") +
+                       labs(title = "In Degree Distribution by Ideology") +
+                       scale_fill_manual(name = "Ideology",
+                                         values = Degree_Colors) +
+                       theme_bw(base_size = 18) +
+                       theme(plot.title = element_text(hjust = 0.5))
+outdeg_dist_barplot
+# Compute mean and median
+sprintf("The Mean of this distribution is %.2f", mean(as.integer(outdeg_df$deg_ideology)))
+sprintf("The Median of this distribution is %.2f", median(as.integer(outdeg_df$deg_ideology)))
+```
+
+## Betweenness Centrality Plot
+
+```{r}
+# Betweenness centrality
+
+# Calculate betweenness centrality
+btwn <- igraph::betweenness(
+  g_full,
+  v = V(g_full),
+  directed = TRUE,
+  weights = E(g_full)$weight,
+  nobigint = TRUE,
+  normalized = TRUE,
+  cutoff = -1 # remove those with negative betweenness (these are anomalous)
+)
+
+# Store betweenness centrality into a dataframe
+btwn_df <- as.data.frame(btwn) %>% 
+  rownames_to_column() %>% 
+  rename(podcasts = rowname) %>% 
+  left_join(nodes_df, by = "podcasts") %>% 
+  mutate(ideology = as.factor(main_ideology)) %>% 
+  filter(btwn > 0.0001)
+
+# Plot distribution
+btwn_plot <- ggplot(btwn_df,
+             aes(x = reorder(podcasts, -btwn),
+                 y = btwn,
+                 fill = main_ideology)) +
+             geom_bar(stat = "identity")  +
+             xlab("Podcast Names") +
+             ylab("Normalized Betweenness Centrality") +
+             labs(title = "Podcast Betweenness Centrality Distribution by Ideology") +
+             scale_fill_manual(name = "Ideology",
+                               values = Btwn_Colors,
+                               labels = Btwn_Ideologies) +
+             theme_bw(base_size = 18) +
+             theme(plot.title = element_text(hjust = 0.5)) +
+             theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6))
+btwn_plot
+
+```
+
+## Distribution of Unique Collaborations
+
+```{r}
+crosspart_uniq_plot <- ggplot(crosspart_df,
+                              aes(x = reorder(crosspart, -count), 
+                                  y = count, 
+                                  fill = cross)) +
+                      geom_bar(stat = "identity") +
+                      labs(title = "Distribution of Unique Cross Partisan Collaborations",
+                           subtitle = "Color Scaled According to Magnitude of Ideological Difference") +
+                      xlab("Type of Collaboration") + 
+                      ylab("Number of Unique Collaborations") +
+                      scale_fill_gradient(name = "Cross Partisan Rating \n (4 = High, 0 = Low)",
+                                          low = "darkred", high = "grey")+
+                      scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+                      theme_bw(base_size = 18) +
+                      theme(plot.title = element_text(hjust = 0.5)) +
+                      theme(plot.subtitle = element_text(hjust = 0.5)) +
+                      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 18))
+crosspart_uniq_plot
+```
+
+## Distribution of All Collaborations
+
+```{r}
+crosspart_totl_plot <- ggplot(crosspart_df,
+                              aes(x = reorder(crosspart, -weight), 
+                                  y = weight,
+                                  fill = cross)) +
+                      geom_bar(stat = "identity") +
+                      labs(title = "Distribution of Unique Cross Partisan Collaborations",
+                           subtitle = "Color Scaled According to Magnitude of Ideological Difference") +
+                      xlab("Type of Collaboration") + 
+                      ylab("Number of Unique Collaborations") +
+                      scale_fill_gradient(name = "Cross Partisan Rating \n (4 = High, 0 = Low)",
+                                          low = "darkred", high = "grey")+
+                      scale_x_discrete(labels = function(x) str_wrap(x, width = 20)) +
+                      theme_bw(base_size = 18) +
+                      theme(plot.title = element_text(hjust = 0.5)) +
+                      theme(plot.subtitle = element_text(hjust = 0.5)) +
+                      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 18))
+crosspart_totl_plot
+```
+
+## Power Law Fits
+
+```{r}
+# Indegree distibution
+indeg_plaw_df <- make_deg_plaw_df(Plaw_Ideologies, indeg_df)
+# Create table visualization
+indeg_plaw_df %>% 
+  rename(Fit = continuous) %>% 
+  mutate(Fit = Plaw_Ideologies) %>% 
+  kbl(caption = "Power Law Fit on In Degree Distribution") %>%
+  kable_classic(full_width = F, html_font = "Garamond")
+```
+
+```{r}
+# Out degree Distribution
+outdeg_plaw_df <- make_deg_plaw_df(Plaw_Ideologies, outdeg_df)
+# Create table visualization
+outdeg_plaw_df %>% 
+  rename(Fit = continuous) %>% 
+  mutate(Fit = Plaw_Ideologies) %>% 
+  kbl(caption = "Power Law Fit on Out Degree Distribution") %>%
+  kable_classic(full_width = F, html_font = "Garamond")
+```
+
+```{r}
+# Betweenness centrality Power Law fit 
+as.data.frame(power.law.fit(btwn_df$btwn)) %>% 
+  rename(Fit = continuous) %>% 
+  mutate(Fit = c("Betweenness")) %>% 
+  kbl(caption = "Power Law Fit on Betweenness Centrality Distribution") %>%
+  kable_classic(full_width = F, html_font = "Garamond")
+```
+
+```{r}
+# Unique Collaborations Power Law Fit
+as.data.frame(power.law.fit(crosspart_df$count)) %>% 
+  rename(Fit = continuous) %>% 
+  mutate(Fit = c("Betweenness")) %>% 
+  kbl(caption = "Power Law Fit on Unique Cross-Partisan Collaborations") %>%
+  kable_classic(full_width = F, html_font = "Garamond")
+```
+
+```{r}
+# Total Collaborations Power Law Fit
+as.data.frame(power.law.fit(crosspart_df$weight)) %>% 
+  rename(Fit = continuous) %>% 
+  mutate(Fit = c("Betweenness")) %>% 
+  kbl(caption = "Power Law Fit on All Cross-Partisan Collaborations") %>%
+  kable_classic(full_width = F, html_font = "Garamond")
+```
+
+## ERGM Models
+
+### Data Preprocessing
+
+```{r}
+# Create dataframe for edges in ergm.
+# Exclude collaboraitons involving "NULL" ideologies (remove NULL values since they are too sparse for simulations)
+
+# Map ideologies to podcasts involved in collaborations
+ideology_df <- nodes_df %>% 
+  select(podcasts, main_ideology)
+
+# First merge to get ideology of hosts
+collab_ergm_df <- collab_df %>% 
+  merge(x = collab_df,
+        y = ideology_df,
+        by.x = "to",
+        by.y = "podcasts") %>% 
+  rename(ideology_host = main_ideology)
+
+# Second merge to get ideology of guests and filter out "NULL" ideologies
+collab_ergm_df <- collab_ergm_df %>% 
+  merge(x = collab_ergm_df,
+        y = ideology_df,
+        by.x = "from",
+        by.y = "podcasts") %>% 
+  rename(ideology_guest = main_ideology) %>% 
+  filter(! ideology_host %in% "NULL",
+         ! ideology_guest %in% "NULL") %>% 
+  mutate(crosspart = str_c(ideology_guest, " - ", ideology_host)) %>% 
+  select(from, to, weight)
+
+
+
+# Load in additional data on host bios
+hostbio_df <- read.csv("podcast_hostattribs.csv") %>%
+  rename(podcasts = Podcast,
+         alternative_media_personality = other,
+         political_personality = politician,
+         professional_personality = political_professional,
+         academic_personality = academic) %>% 
+  mutate(legacy_media_personality = tv_personality + print_personality + radio_personality) %>% 
+  select(2, 4, 8:12) %>% 
+  mutate(sum = rowSums(across(where(is.numeric)))) %>% 
+  mutate(across(2:7, ~ . / sum)) %>% 
+  mutate_at(2:7, ~replace(., is.nan(.), 0)) %>% 
+  select(1:7)
+
+# Subset nodes_df to exclude "NULL" Values
+nodes_ergm_df <- nodes_df %>% 
+  left_join(hostbio_df, by = "podcasts") %>% 
+  filter(! main_ideology %in% "NULL") %>% 
+  mutate_at(12:17, ~ifelse(. > 0, 1, 0))
+
+# create social network graph
+g_ergm <- graph_from_data_frame(collab_ergm_df,
+                                directed = TRUE,
+                                vertices = nodes_ergm_df$podcasts) # Directed edges
+
+# Set node attributes
+g_ergm <- g_ergm %>% 
+  set_vertex_attr("ideology",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$id_code) %>% 
+  set_vertex_attr("distributor",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$distributor_code) %>% 
+  set_vertex_attr("bias_count",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$bias_std) %>%
+  set_vertex_attr("bias_ratio",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$bias_ratio)  %>% 
+  set_vertex_attr("political_personality",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$political_personality)  %>%  
+  set_vertex_attr("academic_personality",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$academic_personality)  %>%
+  set_vertex_attr("professional_personality",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$professional_personality)  %>%  
+  set_vertex_attr("alt_media_personality",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$alternative_media_personality)  %>%  
+  set_vertex_attr("religious_personality",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$religious_personality)  %>% 
+  set_vertex_attr("legacy_media_personality",
+                  index = V(g_ergm),
+                  value = nodes_ergm_df$legacy_media_personality)
+
+# Network object for ERGM
+network <- intergraph::asNetwork(g_ergm)
+```
+
+
+### Model 1
+
+#### Build Model
+
+```{r, echo = FALSE}
+# mod_1 <- ergm(network ~ edges +
+#               nodematch("ideology", diff = T) +
+#               nodeofactor("ideology") +
+#               nodeifactor("ideology") +
+#               nodecov("bias_ratio") +
+#               nodecov("political_personality") +
+#               nodecov("legacy_media_personality") +
+#               nodecov("alt_media_personality") +
+#               nodecov("religious_personality") +
+#               nodecov("academic_personality") +
+#               nodematch("distributor", diff = T) +
+#               odegree(0:5) +
+#               mutual,
+#               control = control.ergm(MCMLE.maxit= 40))
+# Save Model
+# saveRDS(mod_1, file="mod_1.RData")
+```
+
+#### Model Results
+
+```{r}
+mod_1 <- readRDS("mod_1.RData")
+table <- htmlreg(list(mod_1),
+        custom.coef.names = c("Number of Edges",
+                              "Reactionary",
+                              "Conservative",
+                              "Moderate",
+                              "Liberal",
+                              "Radical",
+                              "Difference in In Degree - Conservative",
+                              "Difference in In Degree - Moderate",
+                              "Difference in In Degree - Liberal",
+                              "Difference in In Degree - Radical",
+                              "Difference in Out Degree - Conservative",
+                              "Difference in Out Degree - Moderate",
+                              "Difference in Out Degree - Liberal",
+                              "Difference in Out Degree - Radical",
+                              "Ratio of Biased to Unbiased Statements",
+                              "Host is a political figure",
+                              "Host is a legacy media figure",
+                              "Host is a alternative media figure",
+                              "Host is a relgious leader",
+                              "Host is an academic",
+                              "Independent Podcast",
+                              "Podcast owned by a Single Company",
+                              "Podcast part of a Distribution Network",
+                              "0 Guest Appearances",
+                              "1 Guest Appearances",
+                              "2 Guest Appearances",
+                              "3 Guest Appearances",
+                              "4 Guest Appearances",
+                              "5 Guest Appearances",
+                              "Presence of Mutual Connection"),
+        bold = 0.5)
+htmltools::HTML(table)
+```
+
+#### Diagnostics
+
+```{r}
+gof(mod_1)
+```
+```{r}
+plot(gof(mod_1))
+```
+
+### Model 2
+
+#### Build model
+
+```{r, echo=FALSE}
+#Run and save model
+
+# mod_2 <- ergm(network ~ edges +
+#               nodemix("ideology", base = NULL) +
+#               nodecov("bias_ratio") +
+#               mutual,
+#             control = control.ergm(MCMLE.maxit= 40))
+# saveRDS(mod_2, file="mod_2.RData")
+```
+
+#### Model Results
+
+```{r}
+mod_2 <- readRDS("mod_2.RData")
+table <- htmlreg(list(mod_2),
+       custom.coef.names = c("Number of Edges",
+                             "Conservative -> Reactionary",
+                             "Moderate -> Reactionary",
+                             "Liberal -> Reactionary",
+                             "Radical -> Reactionary",
+                             "Reactionary -> Conservative",
+                             "Conservative -> Conservative",
+                             "Moderate -> Conservative",
+                             "Liberal -> Conservative",
+                             "Radical -> Conservative",
+                             "Reactionary -> Moderate",
+                             "Conservative -> Moderate",
+                             "Moderate -> Moderate",
+                             "Liberal -> Moderate",
+                             "Radical -> Moderate",
+                             "Reactionary -> Liberal",
+                             "Conservative -> Liberal",
+                             "Moderate -> Liberal",
+                             "Liberal -> Liberal",
+                             "Radical -> Liberal",
+                             "Reactionary -> Radical",
+                             "Conservative -> Radical",
+                             "Moderate -> Radical",
+                             "Liberal -> Radical",
+                             "Radical -> Radical",   
+                             "Ratio of Biased to Unbiased Statements",
+                             "Presence of Reciprocal Collaboration"),
+       bold = 0.05)
+htmltools::HTML(table)
+```
+
+#### Diagnostics
+
+```{r}
+gof(mod_2)
+```
+```{r}
+plot(gof(mod_2))
+```
+
